@@ -28,6 +28,11 @@ export default {
     web: {
       favicon: "./assets/favicon.png",
       bundler: "metro"
+    },
+    extra: {
+      eas: {
+        projectId: "30c09e68-da92-49f3-9420-00195ff406cf"
+      }
     }
   }
 };
