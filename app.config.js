@@ -3,7 +3,7 @@ export default {
   expo: {
     name: "ERP B2B Mobile",
     slug: "erp-mobile",
-    version: "1.0.0",
+    version: "1.1.0",
     orientation: "portrait",
     icon: "./assets/icon.png",
     userInterfaceStyle: "light",
