@@ -5,10 +5,11 @@ import React, { useEffect } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { Text, View, StyleSheet } from 'react-native';
+import { Text, View, StyleSheet, Platform } from 'react-native';
 
 import { PreLoginScreen } from '../screens/PreLoginScreen';
-import { LoginScreen } from '../screens/LoginScreen';
+// Usando la versión real para conectar con el BFF
+import { LoginScreen } from '../screens/LoginScreen';  // Versión real para BFF
 import { HomeScreen } from '../screens/HomeScreen';
 import { CartScreen } from '../screens/CartScreen';
 import { OrdersScreen } from '../screens/OrdersScreen';
@@ -157,10 +158,18 @@ const MainStackNavigator = () => {
 export const AppNavigator = () => {
   const { isAuthenticated, isLoading, attemptSilentLogin } = useAuthStore();
   const [preLoginData, setPreLoginData] = React.useState<any>(null);
+  const [customerEmail, setCustomerEmail] = React.useState<string>('');
 
   useEffect(() => {
     attemptSilentLogin();
   }, []);
+
+  // Gestionar la navegación después del pre-login
+  const handlePreLoginSuccess = (data: any, email: string) => {
+    console.log("Pre-login exitoso, cambiando a pantalla de login", data);
+    setPreLoginData(data);
+    setCustomerEmail(email);
+  };
 
   // Mostrar loading screen mientras verifica autenticación
   if (isLoading) {
@@ -175,28 +184,28 @@ export const AppNavigator = () => {
     <NavigationContainer>
       <Stack.Navigator screenOptions={{ headerShown: false }}>
         {!isAuthenticated ? (
-          <>
+          !preLoginData ? (
             <Stack.Screen name="PreLogin">
               {() => (
                 <PreLoginScreen
-                  onSuccess={(data) => setPreLoginData(data)}
+                  onSuccess={(data, email) => handlePreLoginSuccess(data, email)}
                 />
               )}
             </Stack.Screen>
-            
-            {preLoginData && (
-              <Stack.Screen name="Login">
-                {() => (
-                  <LoginScreen
-                    customerData={preLoginData}
-                    onSuccess={() => {
-                      // La autenticación se maneja en el store
-                    }}
-                  />
-                )}
-              </Stack.Screen>
-            )}
-          </>
+          ) : (
+            <Stack.Screen name="Login">
+              {() => (
+                <LoginScreen
+                  customerData={preLoginData}
+                  customerEmail={customerEmail}
+                  onSuccess={() => {
+                    // La autenticación se maneja en el store
+                    console.log("Login exitoso, navegando a la aplicación principal");
+                  }}
+                />
+              )}
+            </Stack.Screen>
+          )
         ) : (
           <Stack.Screen name="Main" component={MainTabs} />
         )}

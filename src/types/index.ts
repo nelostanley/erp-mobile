@@ -29,9 +29,7 @@ export interface Warehouse {
 
 export interface Sucursal {
   id: string;
-  name: string;
-  code: string;
-  address: string;
+  nombre: string;
 }
 
 export interface Product {
@@ -128,8 +126,10 @@ export interface AuthTokens {
 }
 
 export interface PreLoginResponse {
-  customer: Customer;
-  message: string;
+  name: string;
+  address: string;
+  phone: string;
+  nit: string;
 }
 
 export interface LoginRequest {

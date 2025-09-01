@@ -17,7 +17,7 @@ import { apiService } from '../services/api';
 import { COLORS, TYPOGRAPHY, SPACING } from '../constants/theme';
 
 interface PreLoginScreenProps {
-  onSuccess: (customerData: any) => void;
+  onSuccess: (customerData: any, email: string) => void;
 }
 
 export const PreLoginScreen: React.FC<PreLoginScreenProps> = ({ onSuccess }) => {
@@ -40,14 +40,40 @@ export const PreLoginScreen: React.FC<PreLoginScreenProps> = ({ onSuccess }) => 
     setError('');
 
     try {
+      console.log(`Pre-login: Iniciando con email ${email} en plataforma ${Platform.OS}`);
+      
+      // Si no es el usuario de prueba, intentar la solicitud normal
       const response = await apiService.preLogin(email);
-      onSuccess(response);
+      console.log('Pre-login exitoso:', response);
+      onSuccess(response, email);
     } catch (error: any) {
-      if (error.status === 404) {
-        Alert.alert('Error', 'Email no registrado');
+      console.error('Error en pre-login:', error);
+      
+      let errorMessage = 'Error de conexión con el servidor';
+      
+      if (error.response) {
+        // Error del servidor con respuesta
+        console.error('Servidor respondió con error:', error.response.status);
+        if (error.response.status === 404) {
+          errorMessage = 'Email no registrado en el sistema';
+        } else {
+          errorMessage = `Error ${error.response.status}: Por favor contacte al administrador`;
+        }
+      } else if (error.request) {
+        // No se recibió respuesta del servidor
+        console.error('Sin respuesta del servidor');
+        errorMessage = 'No se pudo conectar al servidor. Verifique su conexión de red.';
       } else {
-        Alert.alert('Error', error.message || 'Error en la verificación');
+        // Error de configuración
+        console.error('Error de configuración:', error.message);
+        errorMessage = `Error de conexión: ${error.message}`;
       }
+      
+      Alert.alert(
+        'Error', 
+        errorMessage,
+        [{ text: 'Aceptar' }]
+      );
     } finally {
       setLoading(false);
     }

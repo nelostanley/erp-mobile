@@ -19,7 +19,7 @@ app.use(cors({
 
 // Configurar el proxy para redirigir las solicitudes a la API del servidor BFF
 app.use('/api', createProxyMiddleware({
-  target: 'http://192.168.68.200:3000',
+  target: 'http://localhost:3000',
   changeOrigin: true,
   pathRewrite: {
     '^/api': '/api' // Mantener la ruta /api
@@ -46,5 +46,5 @@ const PROXY_PORT = 3001;
 // Iniciar el servidor
 app.listen(PROXY_PORT, () => {
   console.log(`Servidor proxy ejecutándose en http://localhost:${PROXY_PORT}`);
-  console.log(`Redirigiendo solicitudes a http://192.168.68.200:3000`);
+  console.log(`Redirigiendo solicitudes a http://localhost:3000`);
 });

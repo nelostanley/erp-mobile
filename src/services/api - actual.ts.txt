@@ -20,9 +20,9 @@ let BASE_URL = '';
 
 // Definimos URLs para diferentes entornos
 const SERVER_URLS = {
-  webDev: 'http://localhost:3000/api',           // Desarrollo web local con proxy
-  mobileDev: 'http://192.168.68.200:3000/api',  // Desarrollo en dispositivo móvil
-  production: 'https://bff.erp-api.com/api'     // Producción (ejemplo)
+  webDev: 'http://localhost:3001/api',           // Desarrollo web local con proxy
+  mobileDev: 'http://localhost:3000/api',        // Desarrollo en dispositivo móvil
+  production: 'https://bff.erp-api.com/api'      // Producción (ejemplo)
 };
 
 // Seleccionamos la URL base según la plataforma
@@ -94,6 +94,25 @@ class ApiService {
   // AUTH ENDPOINTS
 
   async preLogin(email: string): Promise<PreLoginResponse> {
+    // Para pruebas, podemos usar un usuario de prueba
+    if (email === 'test@example.com') {
+      console.log('Usando credenciales de prueba para preLogin');
+      // Crear una respuesta de prueba que coincida con PreLoginResponse
+      return { 
+        customer: {
+          id: '1',
+          code: 'TEST001',
+          name: 'Usuario de Prueba',
+          address: 'Dirección de prueba',
+          phone: '1234567890',
+          email: 'test@example.com',
+          customerTypeId: '1',
+          isActive: true
+        },
+        message: 'Usuario de prueba validado'
+      };
+    }
+    
     try {
       console.log(`Enviando solicitud preLogin a: ${BASE_URL}/auth/mobile/pre-login`);
       
@@ -104,17 +123,51 @@ class ApiService {
       );
       
       console.log('Respuesta preLogin recibida:', response.data);
-      return response.data.data;
+      return response.data;
     } catch (error: any) {
       console.error('Error en preLogin:', error.response?.data || error.message);
       throw {
-        message: error.response?.data?.error || 'Error en pre-login',
+        message: error.response?.data?.message || 'Error en pre-login',
         status: error.response?.status || 500,
       };
     }
   }
 
   async login(data: LoginRequest): Promise<LoginResponse> {
+    // Para pruebas, podemos usar un usuario de prueba
+    if (data.email === 'test@example.com' && data.password === 'password') {
+      console.log('Usando credenciales de prueba para login');
+      return {
+        tokens: {
+          accessToken: 'test-access-token',
+          refreshToken: 'test-refresh-token'
+        },
+        customer: {
+          id: '1',
+          code: 'TEST001',
+          name: 'Usuario de Prueba',
+          address: 'Dirección de prueba',
+          phone: '1234567890',
+          email: 'test@example.com',
+          customerTypeId: '1',
+          isActive: true
+        },
+        sucursal: {
+          id: data.sucursalId || '1',
+          name: 'Sucursal Prueba',
+          code: 'SUC001',
+          address: 'Dirección de sucursal de prueba'
+        },
+        warehouse: {
+          id: data.almacenId || '1',
+          name: 'Almacén Prueba',
+          code: 'ALM001',
+          address: 'Dirección de almacén de prueba',
+          sucursalId: data.sucursalId || '1'
+        }
+      };
+    }
+    
     try {
       console.log(`Enviando solicitud login a: ${BASE_URL}/auth/mobile/login`);
       console.log('Datos de login:', JSON.stringify(data));
@@ -124,11 +177,11 @@ class ApiService {
       });
       
       console.log('Login exitoso:', response.data);
-      return response.data.data;
+      return response.data;
     } catch (error: any) {
       console.error('Error en login:', error.response?.data || error.message);
       throw {
-        message: error.response?.data?.error || 'Error en login',
+        message: error.response?.data?.message || 'Error en login',
         status: error.response?.status || 500,
       };
     }
@@ -143,11 +196,11 @@ class ApiService {
         headers: { 'Content-Type': 'application/json' }
       });
       console.log('Token refrescado exitosamente');
-      return response.data.data;
+      return response.data;
     } catch (error: any) {
       console.error('Error al refrescar token:', error.response?.data || error.message);
       throw {
-        message: error.response?.data?.error || 'Error al refrescar token',
+        message: error.response?.data?.message || 'Error al refrescar token',
         status: error.response?.status || 500,
       };
     }
@@ -157,13 +210,13 @@ class ApiService {
 
   async getSucursales(): Promise<Sucursal[]> {
     try {
-      const response = await axios.get(`${BASE_URL}/sucursales`, {
+      const response = await axios.get(`${BASE_URL}/api/sucursales`, {
         headers: this.getAuthHeaders(),
       });
-      return response.data.data;
+      return response.data;
     } catch (error: any) {
       throw {
-        message: error.response?.data?.error || 'Error obteniendo sucursales',
+        message: error.response?.data?.message || 'Error obteniendo sucursales',
         status: error.response?.status || 500,
       };
     }
@@ -171,13 +224,13 @@ class ApiService {
 
   async getAlmacenes(sucursalId: string): Promise<Warehouse[]> {
     try {
-      const response = await axios.get(`${BASE_URL}/almacenes?sucursalId=${sucursalId}`, {
+      const response = await axios.get(`${BASE_URL}/api/almacenes?sucursalId=${sucursalId}`, {
         headers: this.getAuthHeaders(),
       });
-      return response.data.data;
+      return response.data;
     } catch (error: any) {
       throw {
-        message: error.response?.data?.error || 'Error obteniendo almacenes',
+        message: error.response?.data?.message || 'Error obteniendo almacenes',
         status: error.response?.status || 500,
       };
     }
@@ -199,13 +252,13 @@ class ApiService {
       if (categoryId) params.append('categoryId', categoryId);
       if (search) params.append('search', search);
 
-      const response = await axios.get(`${BASE_URL}/products?${params.toString()}`, {
+      const response = await axios.get(`${BASE_URL}/api/products?${params.toString()}`, {
         headers: this.getAuthHeaders(),
       });
-      return response.data.data;
+      return response.data;
     } catch (error: any) {
       throw {
-        message: error.response?.data?.error || 'Error obteniendo productos',
+        message: error.response?.data?.message || 'Error obteniendo productos',
         status: error.response?.status || 500,
       };
     }
@@ -213,13 +266,13 @@ class ApiService {
 
   async getProductById(id: string): Promise<Product> {
     try {
-      const response = await axios.get(`${BASE_URL}/products/${id}`, {
+      const response = await axios.get(`${BASE_URL}/api/products/${id}`, {
         headers: this.getAuthHeaders(),
       });
-      return response.data.data;
+      return response.data;
     } catch (error: any) {
       throw {
-        message: error.response?.data?.error || 'Error obteniendo producto',
+        message: error.response?.data?.message || 'Error obteniendo producto',
         status: error.response?.status || 500,
       };
     }
@@ -242,13 +295,13 @@ class ApiService {
       if (startDate) params.append('startDate', startDate);
       if (endDate) params.append('endDate', endDate);
 
-      const response = await axios.get(`${BASE_URL}/orders?${params.toString()}`, {
+      const response = await axios.get(`${BASE_URL}/api/orders?${params.toString()}`, {
         headers: this.getAuthHeaders(),
       });
-      return response.data.data;
+      return response.data;
     } catch (error: any) {
       throw {
-        message: error.response?.data?.error || 'Error obteniendo pedidos',
+        message: error.response?.data?.message || 'Error obteniendo pedidos',
         status: error.response?.status || 500,
       };
     }
@@ -261,13 +314,13 @@ class ApiService {
     }>;
   }): Promise<Order> {
     try {
-      const response = await axios.post(`${BASE_URL}/orders`, orderData, {
+      const response = await axios.post(`${BASE_URL}/api/orders`, orderData, {
         headers: this.getAuthHeaders(),
       });
-      return response.data.data;
+      return response.data;
     } catch (error: any) {
       throw {
-        message: error.response?.data?.error || 'Error creando pedido',
+        message: error.response?.data?.message || 'Error creando pedido',
         status: error.response?.status || 500,
       };
     }
@@ -277,13 +330,13 @@ class ApiService {
 
   async getFavorites(): Promise<ProductListItem[]> {
     try {
-      const response = await axios.get(`${BASE_URL}/favorites`, {
+      const response = await axios.get(`${BASE_URL}/api/favorites`, {
         headers: this.getAuthHeaders(),
       });
-      return response.data.data;
+      return response.data;
     } catch (error: any) {
       throw {
-        message: error.response?.data?.error || 'Error obteniendo favoritos',
+        message: error.response?.data?.message || 'Error obteniendo favoritos',
         status: error.response?.status || 500,
       };
     }
@@ -291,12 +344,12 @@ class ApiService {
 
   async addToFavorites(productId: string): Promise<void> {
     try {
-      await axios.post(`${BASE_URL}/favorites`, { productId }, {
+      await axios.post(`${BASE_URL}/api/favorites/${productId}`, {}, {
         headers: this.getAuthHeaders(),
       });
     } catch (error: any) {
       throw {
-        message: error.response?.data?.error || 'Error agregando a favoritos',
+        message: error.response?.data?.message || 'Error agregando a favoritos',
         status: error.response?.status || 500,
       };
     }
@@ -304,12 +357,12 @@ class ApiService {
 
   async removeFromFavorites(productId: string): Promise<void> {
     try {
-      await axios.delete(`${BASE_URL}/favorites/${productId}`, {
+      await axios.delete(`${BASE_URL}/api/favorites/${productId}`, {
         headers: this.getAuthHeaders(),
       });
     } catch (error: any) {
       throw {
-        message: error.response?.data?.error || 'Error removiendo de favoritos',
+        message: error.response?.data?.message || 'Error removiendo de favoritos',
         status: error.response?.status || 500,
       };
     }
