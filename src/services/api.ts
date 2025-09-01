@@ -185,13 +185,14 @@ class ApiService {
 
   // PRODUCTOS
 
-  async getProducts(page = 1, limit = 20, categoryId?: string, search?: string): Promise<{
+  async getProducts(warehouseId: string, page = 1, limit = 20, categoryId?: string, search?: string): Promise<{
     products: ProductListItem[];
     totalCount: number;
     hasMore: boolean;
   }> {
     try {
       const params = new URLSearchParams({
+        warehouseId,
         page: page.toString(),
         limit: limit.toString(),
       });
@@ -211,15 +212,43 @@ class ApiService {
     }
   }
 
-  async getProductById(id: string): Promise<Product> {
+  async getProductById(id: string, warehouseId: string): Promise<Product> {
     try {
-      const response = await axios.get(`${BASE_URL}/products/${id}`, {
+      const response = await axios.get(`${BASE_URL}/products/${id}?warehouseId=${warehouseId}`, {
         headers: this.getAuthHeaders(),
       });
       return response.data.data;
     } catch (error: any) {
       throw {
         message: error.response?.data?.error || 'Error obteniendo producto',
+        status: error.response?.status || 500,
+      };
+    }
+  }
+
+  async getMostOrderedProducts(warehouseId: string): Promise<ProductListItem[]> {
+    try {
+      const response = await axios.get(`${BASE_URL}/products/most-ordered?warehouseId=${warehouseId}`, {
+        headers: this.getAuthHeaders(),
+      });
+      return response.data.data;
+    } catch (error: any) {
+      throw {
+        message: error.response?.data?.error || 'Error obteniendo productos más pedidos',
+        status: error.response?.status || 500,
+      };
+    }
+  }
+
+  async getRelatedProducts(productId: string, warehouseId: string): Promise<ProductListItem[]> {
+    try {
+      const response = await axios.get(`${BASE_URL}/products/${productId}/related?warehouseId=${warehouseId}`, {
+        headers: this.getAuthHeaders(),
+      });
+      return response.data.data;
+    } catch (error: any) {
+      throw {
+        message: error.response?.data?.error || 'Error obteniendo productos relacionados',
         status: error.response?.status || 500,
       };
     }
@@ -255,9 +284,16 @@ class ApiService {
   }
 
   async createOrder(orderData: {
+    customerId: string;
+    sucursalId: string;
+    almacenId: string;
+    deliveryDate?: string;
+    notes?: string;
     items: Array<{
       productId: string;
+      unitOfMeasureId: string;
       quantity: number;
+      unitPrice: number;
     }>;
   }): Promise<Order> {
     try {
@@ -268,6 +304,22 @@ class ApiService {
     } catch (error: any) {
       throw {
         message: error.response?.data?.error || 'Error creando pedido',
+        status: error.response?.status || 500,
+      };
+    }
+  }
+
+  // CATEGORÍAS
+
+  async getCategories(): Promise<Array<{ id: string; name: string; imageUrl?: string }>> {
+    try {
+      const response = await axios.get(`${BASE_URL}/categories`, {
+        headers: this.getAuthHeaders(),
+      });
+      return response.data.data;
+    } catch (error: any) {
+      throw {
+        message: error.response?.data?.error || 'Error obteniendo categorías',
         status: error.response?.status || 500,
       };
     }
@@ -310,6 +362,21 @@ class ApiService {
     } catch (error: any) {
       throw {
         message: error.response?.data?.error || 'Error removiendo de favoritos',
+        status: error.response?.status || 500,
+      };
+    }
+  }
+
+  // DEVICE TOKENS
+
+  async registerDeviceToken(token: string): Promise<void> {
+    try {
+      await axios.post(`${BASE_URL}/device-tokens`, { token }, {
+        headers: this.getAuthHeaders(),
+      });
+    } catch (error: any) {
+      throw {
+        message: error.response?.data?.error || 'Error registrando token de dispositivo',
         status: error.response?.status || 500,
       };
     }

@@ -140,10 +140,21 @@ export interface LoginRequest {
 }
 
 export interface LoginResponse {
-  tokens: AuthTokens;
+  accessToken: string;
+  refreshToken: string;
+}
+
+export interface LoginMockResponse {
   customer: Customer;
+  tokens: AuthTokens;
   sucursal: Sucursal;
   warehouse: Warehouse;
+}
+
+export interface Category {
+  id: string;
+  name: string;
+  imageUrl?: string;
 }
 
 // Store State Types
@@ -154,7 +165,7 @@ export interface AuthState {
   warehouse: Warehouse | null;
   isAuthenticated: boolean;
   isLoading: boolean;
-  login: (data: LoginResponse) => void;
+  login: (data: LoginMockResponse) => void;
   logout: () => void;
   setTokens: (tokens: AuthTokens) => void;
   setLoading: (loading: boolean) => void;

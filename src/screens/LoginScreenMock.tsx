@@ -15,6 +15,7 @@ import { Button } from '../components/Button';
 import { Card } from '../components/Card';
 import { useAuthStore } from '../store/authStore';
 import { COLORS, TYPOGRAPHY, SPACING } from '../constants/theme';
+import { LoginMockResponse } from '../types';
 
 interface LoginScreenProps {
   customerData: any;
@@ -47,18 +48,15 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({
       // Simulamos un login exitoso
       setTimeout(() => {
         // Datos simulados para login
-        const loginData = {
+        const loginData: LoginMockResponse = {
           customer: customerData.customer,
           tokens: {
             accessToken: 'test-access-token-12345',
-            refreshToken: 'test-refresh-token-12345',
-            expiresIn: 3600
+            refreshToken: 'test-refresh-token-12345'
           },
           sucursal: {
             id: 'suc-001',
-            name: 'Sucursal Principal',
-            code: 'SUC001',
-            address: 'Av Principal 123'
+            nombre: 'Sucursal Principal'
           },
           warehouse: {
             id: 'alm-001',
