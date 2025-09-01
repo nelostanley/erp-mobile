@@ -23,7 +23,8 @@ export default {
         foregroundImage: "./assets/adaptive-icon.png",
         backgroundColor: "#D32F2F"
       },
-      package: "com.erpsystem.erpmobile"
+      package: "com.erpsystem.erpmobile",
+      usesCleartextTraffic: true // <-- AÑADIR ESTA LÍNEA
     },
     web: {
       favicon: "./assets/favicon.png",
